@@ -2,7 +2,7 @@
 ## react-query v3 → @tanstack/react-query v5 + React 18 → React 19
 
 **Date:** 2026-06-12  
-**Branches:** `upgrade/tanstack-query-v5` → `upgrade/react-19`  
+**Branch:** `upgrade/react-19`  
 **TypeScript errors before → after:** 331 → **0**  
 **Files changed:** ~900+
 
