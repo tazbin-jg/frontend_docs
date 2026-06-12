@@ -444,11 +444,6 @@ yarn lint  # filter for react-compiler and local/no-try-catch
 | `@justgo/planet-icons` React conflict | ✅ Fixed in library | Library was bundling its own React — fixed by externalising React in the library's build config |
 | 7 `@ts-nocheck` files | ✅ Intentional | `justForm/forms/` demo files — pre-existing v2 `createJustForm` API mismatch, unrelated to this upgrade |
 
----
-
-*Generated 2026-06-12 — for questions contact the team lead.*
-
----
 
 ## Pre-Deploy Retest Checklist
 
@@ -590,3 +585,14 @@ yarn lint:quiet
 # Type check — confirm still 0 errors after any local changes
 yarn typecheck
 ```
+
+
+---
+
+*
+ - Generated 2026-06-12
+ - For questions contact me.
+
+*
+
+---
