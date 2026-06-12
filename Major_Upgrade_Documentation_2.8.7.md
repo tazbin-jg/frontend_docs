@@ -452,3 +452,146 @@ yarn lint  # filter for react-compiler and local/no-try-catch
 ---
 
 *Generated 2026-06-12 — for questions contact the team lead.*
+
+---
+
+## Pre-Deploy Retest Checklist
+
+> **Scope:** All items below were touched by this upgrade (package changes, ref fixes, type updates, hook signature changes). Test each area before deploying to a customer environment.
+>
+> **Priority:** 🔴 High (payment / auth / data loss risk) · 🟡 Medium (visible UX) · 🟢 Low (internal tooling)
+
+---
+
+### 🔴 Critical — Test First
+
+#### Payment & Billing Flows
+- [ ] **Stripe Card Entry** — Add card number, expiry, CVC on all 3 forms:
+  - `StripeCustomConnect` → Connect payment details
+  - `JustGoSubscription` → Subscription payment
+  - `FinanceDashboard` → Finance payment details
+  - Confirm card input renders, validates, and submits without errors
+- [ ] **Stripe `@stripe/react-stripe-js` v6** — `Elements` provider, `useStripe`, `useElements` hooks all still functional
+- [ ] **Refund flow** — `Finances / Refund` drawer: select items, enter amount, submit refund
+
+#### Authentication & MFA
+- [ ] **MFA setup** — App authenticator, Email authenticator, WhatsApp authenticator setup flows
+- [ ] **OTP field** — 6-digit input, tab between digits, backspace behaviour (ref array fix applied)
+- [ ] **Contact Number Verification** — Country picker + phone number input
+
+#### Data Loading Infrastructure
+- [ ] **Query client initialisation** — App loads without `ReactCurrentDispatcher` error in console
+- [ ] **`useJustBatchCall` prefetch** — Asset Management page loads (pre-fetches 5+ queries on mount)
+- [ ] **`useJustCall` invalidation** — After saving a record, related queries refresh correctly
+- [ ] **Infinite scroll queries** — Any paginated list (Members, Events) loads more on scroll
+
+---
+
+### 🟡 Medium Priority
+
+#### Asset Management
+- [ ] **Asset details page** — Loads permissions, basic details, credentials, leases tabs
+- [ ] **Permission tabs** — `useGetPermission` for CREDENTIAL, LEASE, LICENSE, TRANSFER types
+- [ ] **Asset list with filters** — Filter sidebar opens/closes (Transition `as="div"` fix)
+- [ ] **Asset credential metadata** — Credential picker loads in edit forms
+
+#### Events & Class Booking
+- [ ] **Event finder / map** — Map view with Azure Maps renders (react-azure-maps unchanged but verify)
+- [ ] **Book a Ticket modal** — Full booking flow: select ticket → group booking → payment
+- [ ] **Class booking** — Session picker, member picker, cart item count display
+- [ ] **Cart item count** — `useGetItemCountInCart` shows correct numbers (queryKey array fix applied)
+- [ ] **Recurring attendee grid** — Mobile scroll handler, ref fix applied
+
+#### Member Profile
+- [ ] **Organisation tab** — Scroll-to-top floating button works (ref cast fix applied)
+- [ ] **Emergency contacts** — Add/edit/remove contacts
+- [ ] **Family details** — Link/unlink family members
+- [ ] **Credentials** — Floating action button scroll behaviour
+- [ ] **Memberships** — List, edit, cancel membership
+- [ ] **Account deactivation** — Dialog opens and closes
+
+#### Members Widget
+- [ ] **Member list** — Table renders, filters work, pagination loads
+- [ ] **Toolbar** — Search, filter, export buttons (clearTimeout ref fix applied)
+- [ ] **Member search** — Debounced search input (clearTimeout ref fix in AddressFinder)
+
+#### Email & Communications
+- [ ] **Email editor** — Template editor (`react-email-editor`) loads and saves
+- [ ] **Email compose** — Template picker, send email flow (ref type fixes applied)
+- [ ] **Segment modal** — Dialog opens, segment list loads
+
+#### Report & Dashboard
+- [ ] **Dashboard toolbar** — Refresh button works (`useRefreshStore` fix applied)
+- [ ] **Report list** — All, Draft, Recent, Favourites tabs load
+- [ ] **PowerBI embed** — Dashboard widget renders without errors
+
+#### Finance Dashboard
+- [ ] **Overview / Payouts** — Grid renders, payout images display (`as unknown as string` cast)
+- [ ] **Balance overview** — No payout empty state shows SVG correctly
+- [ ] **UpdatePaymentProfile** — `QueryClient()` initialises correctly (false-positive fix)
+
+---
+
+### 🟢 Lower Priority (UI Components)
+
+#### Modal & Dialog System
+- [ ] **Modal** — Opens, closes, click-outside dismisses (Dialog.Overlay removed, backdrop replaced)
+- [ ] **ModalDialog** — Drawer-left and screen-center placement modes
+- [ ] **FramelessModal** — Renders without wrapper div (Transition fix)
+- [ ] **Drawer** — Slide-in from left/right, title, close button
+
+#### Transition Animations
+- [ ] **Filter sidebars** — Slide open/close animation (Members, Events, Asset Management, MembershipManagement)
+- [ ] **BottomBar** — Logo/helper button slide in/out
+- [ ] **CollapsibleLeftBar** — Attendee/Session/WaitList panels collapse/expand
+- [ ] **JourneySteps** — Step transition animation
+
+#### Dropdown & Select Components
+- [ ] **Dropdown** — Opens, selects item, closes
+- [ ] **JGListbox** — Multi-select and single-select modes
+- [ ] **JGSelect** — Country select, sort options (Listbox onChange cast applied)
+- [ ] **Toggle / Switch** — ON/OFF state toggles correctly
+- [ ] **Tab component** — Tab navigation, active state highlight
+
+#### Tooltip & Popover
+- [ ] **Tooltip** — Hover shows/hides (clearTimeout `?? undefined` fix applied)
+- [ ] **JGPopover** — Click to open, click outside to close (ref type fix applied)
+- [ ] **Popovers** — Panel positions correctly
+
+#### Form Components
+- [ ] **DataGrid** — Renders rows, sticky header, ref prop fix applied
+- [ ] **ScopeSearch** — Search input with debounce (clearTimeout fix)
+- [ ] **AddressFinder** — Postcode search with debounce (clearTimeout fix)
+- [ ] **CountDownTimer** — Counts down correctly (clearInterval fix applied)
+- [ ] **FileAttachment** — Upload, preview, delete
+- [ ] **CreateSegment / SegmentList** — Renders without SVG type errors
+
+#### SVG Icon Rendering
+- [ ] **Dashboard icons** — SVG icons render as React components (not broken image)
+- [ ] **Alert / cross icons in dialogs** — `AlertIcon`, `CrossBtnIcon` in StatusDialog render
+- [ ] **Search icons** — In SearchComponent, SearchField
+- [ ] **Result module images** — `bg_shape`, `line`, profile images render in player cards
+
+---
+
+### Cross-Cutting Concerns
+
+- [ ] **Browser console** — No `ReactCurrentDispatcher` errors, no `duplicate React` errors
+- [ ] **Network tab** — Query invalidation fires correctly after mutations (open dev tools, perform a save, watch for refetch)
+- [ ] **React DevTools Profiler** — Components with `'use memo'` show compiler memo blocks (optional but useful)
+- [ ] **Mobile / responsive** — Test filter sidebars, bottom bar, mobile attendee view on a small viewport
+
+---
+
+### Test Environment Setup
+
+```bash
+# Start dev server — watch for compiler skip warnings
+yarn dev
+
+# Run lint — check for any new ESLint violations
+yarn lint:quiet
+
+# Type check — confirm still 0 errors after any local changes
+yarn typecheck
+```
