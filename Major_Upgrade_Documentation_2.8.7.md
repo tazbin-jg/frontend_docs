@@ -257,12 +257,7 @@ declare module '*.svg' {
   export { ReactComponent }
   export default ReactComponent
 }
-```
 
-SVGs used as URL strings (e.g. `<img src={logo}>`) require a cast:
-```tsx
-<img src={logo as unknown as string} />
-```
 
 #### 6. `@headlessui/react` v1 → v2
 
